@@ -1,132 +1,384 @@
-# Blok-a-Thon: Facet Building Hackathon
+# 🔄 Revolv Protocol
 
-Welcome to the **Blok-a-Thon**, a Blok Capital hackathon focused on building modular smart contract facets using the Diamond Proxy pattern (EIP-2535). This repository provides a ready-to-use Foundry setup with a fully configured Diamond Proxy architecture.
+**Self-Repaying Loans Powered by Aave V3 Yield**
 
-## Hackathon Overview
-
-### What is this Hackathon About?
-
-This is a **Facet-Building Hackathon** where participants create modular smart contract functionality (facets) that plug into a Diamond Proxy. Instead of building contracts from scratch, you'll leverage the power of the Diamond standard to create composable, upgradeable features.
-
-### Theme: Wealth Management
-
-Build DeFi tools that help users **manage and grow their assets** for the long term. Think wealth building, not speculation.
-
-**Examples:**
-- Token swap mechanisms (like Uniswap)
-- Lending and borrowing protocols (like Aave)
-- Yield farming strategies
-- Any DeFi logic focused on wealth preservation and growth
-
-### Supported Blockchains
-
-- **Arbitrum One** (ARB)
-- **Polygon** (POL)
-- **Avalanche** (AVAX)
-- **Base**
-- **BNB Smart Chain** (BNB)
+Revolv Protocol is a revolutionary DeFi lending system built on Blok Capital's Garden (Diamond Proxy) that enables users to borrow against their collateral with **zero interest** - the loan repays itself automatically using yield generated from Aave V3.
 
 ---
 
-## 📚 Understanding Diamond Proxy (EIP-2535)
+## 🌟 What is Revolv Protocol?
 
-The **Diamond Proxy** pattern allows a single contract to use multiple implementation contracts (facets) through delegatecall. This enables:
+Revolv Protocol introduces **rvUSDC** (Revolv USD Coin), a synthetic stablecoin backed 1:1 by USDC collateral locked in Aave V3. Users can:
 
-- **Modularity**: Add, replace, or remove functionality without redeploying everything
-- **Unlimited Contract Size**: Bypass the 24KB contract size limit
-- **Shared State**: All facets share the same storage
-- **Upgradeability**: Upgrade parts of your system independently
+- **Deposit USDC** as collateral → automatically earns yield on Aave V3
+- **Borrow rvUSDC** up to 50% LTV with **0% interest**
+- **Watch your loan repay itself** as Aave yield automatically reduces your debt
+- **Withdraw collateral** once debt is fully repaid
 
-### Key Concepts
+### The Magic ✨
 
-- **Diamond**: The main proxy contract that delegates calls to facets
-- **Facets**: Implementation contracts containing specific functionality
-- **Function Selectors**: 4-byte identifiers mapping functions to their respective facets
-- **DiamondCut**: The mechanism for adding/replacing/removing facets
-
-**Resources:**
-- [EIP-2535 Specification](https://eips.ethereum.org/EIPS/eip-2535)
-- [Diamond Standard Documentation](https://eip2535diamonds.substack.com/)
+Traditional loans require you to pay interest. Revolv loans **pay themselves** using the yield from your collateral. It's like having a loan that gets smaller every day without you doing anything!
 
 ---
 
-## Getting Started
+## 🎯 Key Features
 
-### Prerequisites
+- ✅ **Zero Interest Loans** - Borrow rvUSDC with 0% interest rate
+- ✅ **Self-Repaying** - Aave yield automatically reduces your debt over time
+- ✅ **50% LTV** - Conservative loan-to-value ratio for safety
+- ✅ **Fully Backed** - Every rvUSDC is backed 1:1 by USDC collateral
+- ✅ **Liquid Token** - rvUSDC can be used anywhere (DEXs, DeFi protocols, etc.)
+- ✅ **Diamond Proxy** - Built on EIP-2535 for modularity and upgradeability
+- ✅ **No Liquidation Risk** - Stablecoin-only (USDC) means no price volatility
+
+---
+
+## 🏗️ How It Works
+
+### 1. **Deposit Collateral**
+```
+User deposits 10,000 USDC
+  ↓
+Protocol supplies to Aave V3
+  ↓
+Receives aUSDC (Aave interest-bearing token)
+  ↓
+Collateral locked in Garden
+```
+
+### 2. **Borrow rvUSDC**
+```
+User borrows 5,000 rvUSDC (50% of collateral)
+  ↓
+rvUSDC minted and sent to user
+  ↓
+Debt tracked: 5,000 rvUSDC
+```
+
+### 3. **Automatic Debt Repayment**
+```
+Aave generates yield on 10,000 USDC
+  ↓
+Periodically, harvest() is called
+  ↓
+Yield withdrawn from Aave
+  ↓
+Debt automatically reduced: 5,000 → 4,500 → 4,000... → 0
+```
+
+### 4. **Withdraw or Keep Earning**
+```
+Once debt = 0:
+  ↓
+Option A: Withdraw all collateral
+Option B: Keep earning yield (debt already paid!)
+```
+
+---
+
+## 📋 Prerequisites
 
 - [Foundry](https://book.getfoundry.sh/getting-started/installation) installed
-- Basic understanding of Solidity
-- Git installed
+- Node.js (for dependencies)
+- Git
+- Basic understanding of Solidity and DeFi
 
-### 1. Fork and Clone the Repository
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the Repository
 
 ```bash
-# Fork this repository on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/Blokathon-Foundry.git
+git clone https://github.com/0xshae/Blokathon-Foundry.git
 cd Blokathon-Foundry
+```
 
-# Install dependencies
+### 2. Install Dependencies
+
+```bash
 forge install
 ```
 
-### 2. Set Up Environment Variables
+### 3. Set Up Environment
 
 ```bash
-# Copy the example environment file
+# Copy example env file
 cp .envExample .env
 
 # Edit .env with your credentials
-nano .env  # or use your preferred editor
+nano .env
 ```
 
-**`.env` file structure:**
+**Required variables:**
 ```bash
+# For testnet deployment
+PRIVATE_KEY=0x...your_private_key
+RPC_URL_BASE_SEPOLIA=https://sepolia.base.org
+
+# For local testing
 PRIVATE_KEY_ANVIL=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 RPC_URL_ANVIL=http://127.0.0.1:8545
-
-# For deploying to real networks
-PRIVATE_KEY=your_private_key_here
-RPC_URL_ARBITRUM=https://arb1.arbitrum.io/rpc
-RPC_URL_POLYGON=https://polygon-rpc.com
-RPC_URL_AVALANCHE=https://api.avax.network/ext/bc/C/rpc
-RPC_URL_BASE=https://mainnet.base.org
-RPC_URL_BSC=https://bsc-dataseed.binance.org
-
-# Etherscan API keys for verification
-API_KEY_ETHERSCAN=your_etherscan_api_key
-API_KEY_ARBISCAN=your_arbiscan_api_key
-API_KEY_POLYGONSCAN=your_polygonscan_api_key
-API_KEY_SNOWTRACE=your_snowtrace_api_key
-API_KEY_BASESCAN=your_basescan_api_key
-API_KEY_BSCSCAN=your_bscscan_api_key
 ```
 
-### 3. Load Environment Variables
-
-```bash
-source .env
-```
-
----
-
-## 🛠️ Foundry Commands
-
-### Build Contracts
+### 4. Build Contracts
 
 ```bash
 forge build
 ```
 
-### Run Tests
+### 5. Run Tests
 
 ```bash
 forge test
+```
 
-# Run with verbosity
+---
+
+## 🧪 Testing
+
+Revolv Protocol includes comprehensive tests covering:
+
+- ✅ Token operations (mint, transfer, approve)
+- ✅ Collateral deposits
+- ✅ Borrowing with LTV checks
+- ✅ Debt repayment
+- ✅ Yield harvesting and automatic debt reduction
+- ✅ Access control (owner-only functions)
+
+**Run all tests:**
+```bash
+forge test
+```
+
+**Run with verbosity:**
+```bash
 forge test -vvv
+```
 
-# Run specific test
-forge test --match-test testFunctionName
+**Run specific test:**
+```bash
+forge test --match-test testDepositAndBorrow
+```
+
+---
+
+## 🌐 Deployment
+
+### Step 1: Deploy Diamond
+
+First, deploy the base Diamond contract:
+
+```bash
+source .env
+
+forge script script/Deploy.s.sol \
+  --rpc-url $RPC_URL_BASE_SEPOLIA \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+```
+
+**Save the Diamond address** from the output!
+
+### Step 2: Deploy Revolv Facet
+
+Update `script/DeployRevolvFacet.s.sol` with your Diamond address, then:
+
+```bash
+forge script script/DeployRevolvFacet.s.sol \
+  --rpc-url $RPC_URL_BASE_SEPOLIA \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+```
+
+This adds the RevolvFacet to your Diamond with all 14 functions:
+- 8 ERC20 token functions (name, symbol, decimals, totalSupply, balanceOf, transfer, approve, transferFrom)
+- 5 vault functions (depositCollateral, borrow, repay, withdraw, harvest)
+- 1 admin function (adminMint)
+
+### Step 3: Create Uniswap V3 Pool (Optional)
+
+To enable trading of rvUSDC, create a Uniswap V3 pool:
+
+```bash
+export DIAMOND_ADDR=0xYourDiamondAddress
+
+forge script script/CreatePool.s.sol \
+  --rpc-url $RPC_URL_BASE_SEPOLIA \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+```
+
+This will:
+1. Mint 1,000 rvUSDC to seed liquidity
+2. Create a Uniswap V3 pool (rvUSDC/USDC)
+3. Add initial liquidity (1,000 rvUSDC + 1,000 USDC)
+
+---
+
+## 💻 Usage Examples
+
+### Interact with Revolv Protocol
+
+Once deployed, you can interact with the Diamond address directly:
+
+```solidity
+// The Diamond address IS the rvUSDC token
+IRevolv revolv = IRevolv(diamondAddress);
+
+// Deposit collateral
+revolv.depositCollateral(10_000 * 1e6); // 10,000 USDC
+
+// Borrow rvUSDC (up to 50% LTV)
+revolv.borrow(5_000 * 1e6); // 5,000 rvUSDC
+
+// Check your balance
+uint256 balance = revolv.balanceOf(msg.sender);
+
+// Transfer rvUSDC
+revolv.transfer(recipient, 1_000 * 1e6);
+
+// Harvest yield (reduces debt automatically)
+revolv.harvest(msg.sender);
+
+// Withdraw collateral (only when debt = 0)
+revolv.withdraw(10_000 * 1e6);
+```
+
+### Using Cast (Command Line)
+
+```bash
+# Check rvUSDC balance
+cast call $DIAMOND_ADDR "balanceOf(address)" $USER_ADDRESS --rpc-url $RPC_URL
+
+# Check total supply
+cast call $DIAMOND_ADDR "totalSupply()" --rpc-url $RPC_URL
+
+# Deposit collateral
+cast send $DIAMOND_ADDR "depositCollateral(uint256)" 1000000000 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $RPC_URL
+
+# Borrow rvUSDC
+cast send $DIAMOND_ADDR "borrow(uint256)" 500000000 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $RPC_URL
+```
+
+---
+
+## 📁 Project Structure
+
+```
+Blokathon-Foundry/
+├── src/
+│   ├── Diamond.sol                    # Main Diamond proxy contract
+│   ├── facets/
+│   │   ├── Facet.sol                  # Base facet (reentrancy, ownership)
+│   │   ├── baseFacets/                # Core Diamond facets
+│   │   │   ├── cut/                   # DiamondCut functionality
+│   │   │   ├── loupe/                 # DiamondLoupe introspection
+│   │   │   └── ownership/             # Ownership management
+│   │   └── utilityFacets/
+│   │       ├── RevolvFacet.sol        # 🎯 Main Revolv implementation
+│   │       ├── IRevolv.sol            # Revolv interface
+│   │       └── RevolvStorage.sol      # Storage layout (token + vault)
+│   └── interfaces/
+├── script/
+│   ├── Deploy.s.sol                   # Deploy Diamond
+│   ├── DeployRevolvFacet.s.sol        # Deploy Revolv facet
+│   ├── CreatePool.s.sol               # Create Uniswap V3 pool
+│   └── Base.s.sol                     # Base script utilities
+├── test/
+│   ├── RevolvFacet.t.sol              # Comprehensive test suite
+│   └── mocks/
+│       ├── MockERC20.sol              # Mock USDC token
+│       └── MockAavePool.sol            # Mock Aave pool
+├── .envExample                        # Environment template
+└── README.md                          # This file
+```
+
+---
+
+## 🔧 Architecture
+
+### Diamond Proxy Pattern (EIP-2535)
+
+Revolv Protocol is built on the Diamond Proxy standard, which enables:
+
+- **Modularity**: Add/remove/upgrade facets without redeploying
+- **Unlimited Size**: Bypass 24KB contract size limit
+- **Shared Storage**: All facets share the same storage space
+- **Upgradeability**: Upgrade individual facets independently
+
+### Storage Pattern
+
+Revolv uses a **namespaced storage library** pattern:
+
+```solidity
+library RevolvStorage {
+    bytes32 constant STORAGE_POSITION = keccak256("revolv.storage");
+    
+    struct Layout {
+        // Token state (rvUSDC)
+        mapping(address => uint256) balances;
+        mapping(address => mapping(address => uint256)) allowances;
+        uint256 totalSupply;
+        
+        // Vault state
+        mapping(address => uint256) userCollateralPrincipal;
+        mapping(address => uint256) userDebt;
+        uint256 totalCollateralPrincipal;
+        
+        // Config
+        address usdc;
+        address aavePool;
+        address aUsdc;
+    }
+}
+```
+
+### Token Implementation
+
+rvUSDC is **not** a standard ERC20 contract. Instead, it's implemented directly on Diamond storage:
+
+- ✅ All ERC20 functions work (transfer, approve, balanceOf, etc.)
+- ✅ Stored in Diamond's shared storage
+- ✅ Can be upgraded via DiamondCut
+- ✅ No separate token contract deployment needed
+
+---
+
+## 🔐 Security Features
+
+- **Reentrancy Protection**: All state-changing functions use `nonReentrant` modifier
+- **Access Control**: Admin functions restricted to Diamond owner
+- **Conservative LTV**: 50% maximum loan-to-value ratio
+- **Stablecoin Only**: USDC-only reduces liquidation risk
+- **Storage Isolation**: Namespaced storage prevents collisions
+- **Safe Math**: Solidity 0.8.20 built-in overflow protection
+
+---
+
+## 📊 Current Deployment
+
+**Base Sepolia Testnet:**
+- Diamond: `0xc4bf49cE8Da3f8b5166Da8E5f62660aEdaDE948D`
+- RevolvFacet: `0x4d733dae9218a1bD983778c1F4bBe3E0307D9Ed0`
+
+**Aave V3 Sepolia Addresses:**
+- USDC: `0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8`
+- Aave Pool: `0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951`
+- aUSDC: `0x16dA4541aD1807f4443d92D26044C1147406EB80`
+
+---
+
+## 🛠️ Development
+
+### Build
+
+```bash
+forge build
 ```
 
 ### Format Code
@@ -149,302 +401,62 @@ forge clean
 
 ---
 
-## 🌐 Deployment
+## 📚 Learn More
 
-### Deploy to Local Anvil (for testing)
+### Diamond Proxy Pattern
+- [EIP-2535 Specification](https://eips.ethereum.org/EIPS/eip-2535)
+- [Diamond Standard Documentation](https://eip2535diamonds.substack.com/)
 
-**Terminal 1 - Start Anvil:**
-```bash
-anvil
-```
+### Aave V3
+- [Aave V3 Documentation](https://docs.aave.com/)
+- [Aave V3 GitHub](https://github.com/aave/aave-v3-core)
 
-**Terminal 2 - Deploy Diamond:**
-```bash
-source .env
-
-forge script script/Deploy.s.sol \
-  --rpc-url $RPC_URL_ANVIL \
-  --private-key $PRIVATE_KEY_ANVIL \
-  --broadcast
-```
-
-**Important:** If you use a different private key variable name in your `.env`, update the corresponding line in `script/Deploy.s.sol`:
-
-```solidity
-bytes32 privateKey = vm.envBytes32("YOUR_PRIVATE_KEY_NAME");
-```
-
-### Deploy to Mainnet/Testnet
-
-```bash
-source .env
-
-forge script script/Deploy.s.sol \
-  --rpc-url $RPC_URL_ARBITRUM \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  --verify \
-  --slow \
-  --etherscan-api-key $API_KEY_ARBISCAN
-```
-
-Replace `$RPC_URL_ARBITRUM` and `$API_KEY_ARBISCAN` with the appropriate variables for your target chain:
-- Polygon: `$RPC_URL_POLYGON`, `$API_KEY_POLYGONSCAN`
-- Avalanche: `$RPC_URL_AVALANCHE`, `$API_KEY_SNOWTRACE`
-- Base: `$RPC_URL_BASE`, `$API_KEY_BASESCAN`
-- BSC: `$RPC_URL_BSC`, `$API_KEY_BSCSCAN`
-
-### Verification Failed? Resume Verification
-
-If deployment succeeds but Etherscan verification fails:
-
-```bash
-forge script script/Deploy.s.sol \
-  --rpc-url $RPC_URL_ARBITRUM \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  --verify \
-  --slow \
-  --resume \
-  --etherscan-api-key $API_KEY_ARBISCAN
-```
-
-### Deploy Additional Facets
-
-After the Diamond is deployed, you can add new facets:
-
-```bash
-forge script script/DeployFacet.s.sol \
-  --rpc-url $RPC_URL_ANVIL \
-  --private-key $PRIVATE_KEY_ANVIL \
-  --broadcast
-```
-
-### Deploy Revolv Facet (rvUSDC)
-```bash
-# 1) Deploy Diamond first (script/Deploy.s.sol) and grab DIAMOND address
-
-# 2) Deploy/replace Revolv facet on Diamond
-forge script script/DeployRevolvFacet.s.sol \
-  --rpc-url $RPC_URL_BASE_SEPOLIA \
-  --private-key $PRIVATE_KEY \
-  --broadcast
-
-# 3) Create Uniswap V3 pool (rvUSDC/USDC) and seed liquidity
-export DIAMOND_ADDR=0xYourDiamondAddress
-forge script script/CreatePool.s.sol \
-  --rpc-url $RPC_URL_BASE_SEPOLIA \
-  --private-key $PRIVATE_KEY \
-  --broadcast
-```
-
-**Notes:**
-- RevolvFacet uses Aave V3 yield on Sepolia; addresses are hardcoded with owner-only override via `setConfig`.
-- `adminMint` is owner-only and used to seed initial rvUSDC liquidity for the pool.
+### Foundry
+- [Foundry Book](https://book.getfoundry.sh/)
+- [Foundry GitHub](https://github.com/foundry-rs/foundry)
 
 ---
 
-## 📁 Repository Structure
+## 🤝 Contributing
 
-```
-Blokathon-Foundry/
-├── src/
-│   ├── Diamond.sol                # Main Diamond proxy contract
-│   ├── facets/
-│   │   ├── Facet.sol              # Base facet contract
-│   │   ├── baseFacets/            # Core Diamond facets
-│   │   │   ├── cut/               # DiamondCut functionality
-│   │   │   ├── loupe/             # DiamondLoupe for introspection
-│   │   │   └── ownership/         # Ownership management
-│   │   └── utilityFacets/         # Your custom facets go here!
-│   │       ├── RevolvFacet.sol    # Self-repaying rvUSDC loans (Aave V3 yield)
-│   │       ├── IRevolv.sol        # Revolv interface
-│   │       └── RevolvStorage.sol  # Revolv storage (token + vault state)
-│   ├── interfaces/                # Interface definitions
-│   └── libraries/                 # Shared libraries
-├── script/
-│   ├── Deploy.s.sol               # Diamond deployment script
-│   ├── DeployFacet.s.sol          # Example facet deployment script
-│   ├── DeployRevolvFacet.s.sol    # Deploy/replace Revolv facet on Diamond
-│   └── CreatePool.s.sol           # Create Uniswap V3 pool (rvUSDC/USDC) on Sepolia
-│   └── Base.s.sol                 # Base script utilities
-├── test/                          # Test files
-├── .envExample                    # Example environment variables
-└── README.md                      # This file
-```
+This project was built for the **Blok-a-Thon** hackathon by Blok Capital. Contributions and improvements are welcome!
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-## 💡 Building Your Facet
+## 📝 License
 
-### Step 1: Create Your Facet Files
-
-Create four files in `src/facets/utilityFacets/`:
-
-1. **`YourFacetStorage.sol`** - Storage struct
-2. **`IYourFacet.sol`** - Interface
-3. **`YourFacetBase.sol`** - Internal logic
-4. **`YourFacet.sol`** - Public-facing facet
-
-### Step 2: Example Facet Structure
-
-**YourFacetStorage.sol:**
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-library YourFacetStorage {
-    bytes32 constant STORAGE_POSITION = keccak256("your.facet.storage");
-    
-    struct Layout {
-        mapping(address => uint256) balances;
-        uint256 totalSupply;
-    }
-    
-    function layout() internal pure returns (Layout storage l) {
-        bytes32 position = STORAGE_POSITION;
-        assembly {
-            l.slot := position
-        }
-    }
-}
-```
-
-**IYourFacet.sol:**
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-interface IYourFacet {
-    function yourFunction() external returns (uint256);
-}
-```
-
-**YourFacetBase.sol:**
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-import "./YourFacetStorage.sol";
-
-contract YourFacetBase {
-    function _yourInternalLogic() internal view returns (uint256) {
-        YourFacetStorage.Layout storage l = YourFacetStorage.layout();
-        return l.totalSupply;
-    }
-}
-```
-
-**YourFacet.sol:**
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-import "../Facet.sol";
-import "./YourFacetBase.sol";
-import "./IYourFacet.sol";
-
-contract YourFacet is Facet, YourFacetBase, IYourFacet {
-    function yourFunction() external override returns (uint256) {
-        return _yourInternalLogic();
-    }
-}
-```
-
-### Step 3: Test Your Facet
-
-Create a test file in `test/`:
-
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-import "forge-std/Test.sol";
-import "../src/Diamond.sol";
-import "../src/facets/utilityFacets/YourFacet.sol";
-
-contract YourFacetTest is Test {
-    Diamond diamond;
-    YourFacet yourFacet;
-    
-    function setUp() public {
-        // Deploy and configure diamond
-        diamond = new Diamond(address(this));
-        yourFacet = new YourFacet();
-        
-        // Add facet to diamond using DiamondCut
-        // ... (cut logic here)
-    }
-    
-    function testYourFunction() public {
-        // Your test logic
-    }
-}
-```
-
-### Step 4: Deploy Your Facet
-
-Update `script/DeployFacet.s.sol` with your facet's deployment logic, then run:
-
-```bash
-forge script script/DeployFacet.s.sol \
-  --rpc-url $RPC_URL_ANVIL \
-  --private-key $PRIVATE_KEY_ANVIL \
-  --broadcast
-```
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-## 🧪 Interacting with Cast
+## 🙏 Acknowledgments
 
-### Query Diamond Functions
-
-```bash
-# Get all facets
-cast call $DIAMOND_ADDRESS "facets()" --rpc-url $RPC_URL_ANVIL
-
-# Get facet address for a function
-cast call $DIAMOND_ADDRESS "facetAddress(bytes4)" $FUNCTION_SELECTOR --rpc-url $RPC_URL_ANVIL
-
-# Call your custom function
-cast call $DIAMOND_ADDRESS "yourFunction()" --rpc-url $RPC_URL_ANVIL
-```
-
-### Send Transactions
-
-```bash
-cast send $DIAMOND_ADDRESS "yourFunction(uint256)" 100 \
-  --private-key $PRIVATE_KEY_ANVIL \
-  --rpc-url $RPC_URL_ANVIL
-```
+- **Blok Capital** for the hackathon and Diamond Proxy infrastructure
+- **Aave** for the yield generation protocol
+- **Nick Mudge** for the Diamond Standard (EIP-2535)
+- **OpenZeppelin** for security libraries
 
 ---
 
-## 📖 Helpful Resources
+## 🚨 Disclaimer
 
-- **Foundry Book**: https://book.getfoundry.sh/
-- **EIP-2535 Diamond Standard**: https://eips.ethereum.org/EIPS/eip-2535
-- **Diamond Pattern Guide**: https://eip2535diamonds.substack.com/
-- **Solidity Documentation**: https://docs.soliditylang.org/
+This software is provided "as is" without warranty. Use at your own risk. Always audit smart contracts before deploying to mainnet.
 
 ---
 
-## 🏆 Hackathon Tips
+## 📧 Contact
 
-1. **Start Simple**: Begin with a basic facet and iterate
-2. **Read EIP-2535**: Understanding the Diamond pattern is crucial
-3. **Use Storage Properly**: Each facet should use namespaced storage to avoid collisions
-4. **Test Thoroughly**: Write comprehensive tests for your facet
-5. **Focus on Wealth Management**: Build tools that help users grow and preserve assets
-6. **Consider Security**: Use OpenZeppelin libraries when possible
-7. **Document Your Code**: Clear comments help judges understand your work
+- **GitHub**: [@0xshae](https://github.com/0xshae)
+- **Project**: Built for Blok-a-Thon Hackathon
 
 ---
 
-## 🤝 Getting Help
+**Built with ❤️ for the Blok-a-Thon Hackathon**
 
-- Review existing facets in `src/facets/` for examples
-- Check the Foundry documentation for tooling questions
-- Study the Diamond proxy implementation in `src/Diamond.sol`
-
----
+*Revolv Protocol - Where loans repay themselves* 🔄
