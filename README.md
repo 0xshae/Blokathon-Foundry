@@ -220,6 +220,28 @@ forge script script/DeployFacet.s.sol \
   --broadcast
 ```
 
+### Deploy Revolv Facet (rvUSDC)
+```bash
+# 1) Deploy Diamond first (script/Deploy.s.sol) and grab DIAMOND address
+
+# 2) Deploy/replace Revolv facet on Diamond
+forge script script/DeployRevolvFacet.s.sol \
+  --rpc-url $RPC_URL_BASE_SEPOLIA \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+
+# 3) Create Uniswap V3 pool (rvUSDC/USDC) and seed liquidity
+export DIAMOND_ADDR=0xYourDiamondAddress
+forge script script/CreatePool.s.sol \
+  --rpc-url $RPC_URL_BASE_SEPOLIA \
+  --private-key $PRIVATE_KEY \
+  --broadcast
+```
+
+**Notes:**
+- RevolvFacet uses Aave V3 yield on Sepolia; addresses are hardcoded with owner-only override via `setConfig`.
+- `adminMint` is owner-only and used to seed initial rvUSDC liquidity for the pool.
+
 ---
 
 ## 📁 Repository Structure
@@ -235,11 +257,16 @@ Blokathon-Foundry/
 │   │   │   ├── loupe/             # DiamondLoupe for introspection
 │   │   │   └── ownership/         # Ownership management
 │   │   └── utilityFacets/         # Your custom facets go here!
+│   │       ├── RevolvFacet.sol    # Self-repaying rvUSDC loans (Aave V3 yield)
+│   │       ├── IRevolv.sol        # Revolv interface
+│   │       └── RevolvStorage.sol  # Revolv storage (token + vault state)
 │   ├── interfaces/                # Interface definitions
 │   └── libraries/                 # Shared libraries
 ├── script/
 │   ├── Deploy.s.sol               # Diamond deployment script
-│   ├── DeployFacet.s.sol          # Facet deployment script
+│   ├── DeployFacet.s.sol          # Example facet deployment script
+│   ├── DeployRevolvFacet.s.sol    # Deploy/replace Revolv facet on Diamond
+│   └── CreatePool.s.sol           # Create Uniswap V3 pool (rvUSDC/USDC) on Sepolia
 │   └── Base.s.sol                 # Base script utilities
 ├── test/                          # Test files
 ├── .envExample                    # Example environment variables

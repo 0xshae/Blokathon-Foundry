@@ -8,7 +8,7 @@ import {IDiamondCut} from "src/facets/baseFacets/cut/IDiamondCut.sol";
 import {AaveV3Facet} from "src/facets/utilityFacets/aaveV3/AaveV3Facet.sol";
 
 contract DeployFacetScript is BaseScript {
-    address internal constant DIAMOND_ADDRESS = 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9;
+    address internal constant DIAMOND_ADDRESS = 0xc4bf49cE8Da3f8b5166Da8E5f62660aEdaDE948D;
 
     function run() public broadcaster {
         setUp();
